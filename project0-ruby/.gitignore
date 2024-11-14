@@ -1,0 +1,16 @@
+log/*
+!/log/.keep
+
+tmp/*
+!/tmp/.keep
+
+storage/*
+!/storage/.keep
+
+.env
+.env*.local
+
+db/*.sqlite3*
+
+config/initializers/secret_token.rb
+config/master.key
