@@ -2,7 +2,7 @@
 
 Pet Tracker API is meant to track pets and their owners. The relationship between owners and pets is one to many. 
 
-![pet tracker diagram](/docs/images/pet_tracker.jpeg)
+![pet tracker diagram](/docs/images/pet_tracker.jpg)
 
 *Technical Details*
 - The API http routing is built using python Flask
