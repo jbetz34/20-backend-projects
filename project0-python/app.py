@@ -1,5 +1,5 @@
 from flask import Flask, request
-from dbquery import new_pet, new_owner, select
+from dbquery import  select, insert
 import sqlite3 as sql
 
 app = Flask(__name__)
@@ -7,12 +7,12 @@ app = Flask(__name__)
 @app.route("/pets/", methods=['POST'])
 def add_pet():
         data = request.get_json()
-        return select('database.db', 'pets', **data)
+        return insert('database.db', 'pets', data)
 
 @app.route("/owners/", methods=['POST'])
 def add_owner():
         data = request.get_json()
-        return select('database.db', 'owners', **data)
+        return insert('database.db', 'owners', data)
 
 @app.route("/owners/", methods=['GET'])
 @app.route("/owners/<id>", methods=['GET'])
