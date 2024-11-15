@@ -1,5 +1,5 @@
 from flask import Flask, request
-from dbquery import insert, select, update
+from dbquery import insert, select, update, delete
 import sqlite3 as sql
 
 app = Flask(__name__)
@@ -13,41 +13,40 @@ app = Flask(__name__)
 # TODO currently only supports one filter per key
 # TODO does not handle mis-named column filters
 @app.route("/articles/", methods=['GET'])
-@app.route("/articles/<id>", methods=['GET'])
-def get_article(id=None):
+def get_article():
         data = request.get_json() if request.is_json else {}
-        if id: data.update({'id':int(id)})
+        data.update(request.args.to_dict())
         return select('database.db', 'articles', **data)
 
 # POST /articles        - Create new article
 @app.route("/articles/", methods=['POST'])
 def post_article():
-        data = request.get_json()
+        data = request.get_json() if request.is_json else {}
+        data.update(request.args.to_dict())
         return insert('database.db', 'articles', data)
 
 # PUT /articles         - Create new article
-# PUT /articles/id      - Create/update article where id=id
+# PUT /articles?id      - Create/update article where id=id
 @app.route("/articles/", methods=['PUT'])
-@app.route("/articles/<id>", methods=['PUT'])
-def update_article(id=None):
-        data = request.get_json()
-        data.update({'id':int(id)})
-        print(data)
+def update_article():
+        data = request.get_json() if request.is_json else {}
+        data.update(request.args.to_dict())
+        
+        id = data.get('id')
+        
         if not id :
-                print ('no id presented, creating new article:')
                 return insert('database.db', 'articles', data)
-        exists = select('database.db', 'articles', id=int(id))
+
+        exists = select('database.db', 'articles', id=id)
+
         if exists[1] != 200:
-                print('error while getting article')
                 return exists
         elif not exists[0] : 
-                print('id DOES NOT exist in db')
                 return insert('database.db','articles',data)
         else: 
-                print('id exists in db, updating entry')
                 return update('database.db','articles', id, data)
 
 # DELETE /articles/id   - Delete a single article
-@app.route("/pets/<id>", methods=['DELETE'])
+@app.route("/articles/<id>", methods=['DELETE'])
 def delete_article(id):
-        return delete('database.db', 'articles', int(id))
+        return delete('database.db', 'articles', id)

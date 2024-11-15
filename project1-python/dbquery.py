@@ -8,22 +8,19 @@ def delete(database, table, id):
                 table    [string]       - table to delete from
                 id       [integer]      - article id to delete
         Returns:
-                204 - on success
+                200 - on success
                 500 - on failure
         '''
         sql_statement = 'DELETE FROM %s WHERE id = %s' % (table, id)
-        print("DELETE:")
         print(sql_statement)
         try: 
                 with sql.connect(database, detect_types=1) as conn:
                         cur = conn.cursor()
-                        cur.execute(sql_statement, data)
+                        cur.execute(sql_statement)
                         conn.commit()
-                return select('database.db', table, id=cur.lastrowid)[0], 200
+                return ([],200)
         except sql.OperationalError as e:
                 return "Failed to delete record:" + str(e), 500
-        
-                
 
 def update(database, table, id, data):
         '''
@@ -34,21 +31,20 @@ def update(database, table, id, data):
                 id       [integer]      - article id to update
                 data     [dict]         - data to insert into the table record
         Returns:
-                204 - on success
+                200 - on success
                 500 - on failure
         '''
-        sql_statement = 'UPDATE OR REPLACE %s ' % table
+        sql_statement = 'UPDATE %s ' % table
         sql_statement += 'SET ' + ', '.join([str(k) + ' = "' + str(v) + '" ' for k,v in data.items()])
         sql_statement += 'WHERE id = ' + str(id)
         # pls god find a way to make this cleaner
-        print("UPDATE:")
         print(sql_statement)
         try: 
                 with sql.connect(database, detect_types=1) as conn:
                         cur = conn.cursor()
                         cur.execute(sql_statement, data)
                         conn.commit()
-                return select('database.db', table, id=cur.lastrowid)[0], 200
+                return select('database.db', table, id=id)[0], 200
         except sql.OperationalError as e:
                 return "Failed to update record:" + str(e), 500
 
@@ -66,7 +62,6 @@ def insert(database, table, data):
         sql_statement = 'INSERT INTO '
         sql_statement += table + ' ( ' + ', '.join(data.keys()) + ') ' # column names
         sql_statement += 'VALUES ( :' + ', :'.join(data.keys()) + ') ' # column values
-        print("INSERT:")
         print(sql_statement)
         try: 
                 with sql.connect(database, detect_types=1) as conn:
@@ -89,10 +84,8 @@ def select(database, table, **kwargs):
                 500 - on failure
         '''
         sql_statement = 'SELECT * FROM %s' % table
-        print("SELECT:")
-        print(kwargs)
         if kwargs:
-                sql_statement += ' WHERE ' + ' AND '.join(["%s = %s" % (x) for x in kwargs.items()]) 
+                sql_statement += ' WHERE ' + ' AND '.join(["%s = '%s'" % (x) for x in kwargs.items()]) 
         print(sql_statement)
         try:
                 with sql.connect(database) as conn:
